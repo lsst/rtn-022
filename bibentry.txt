@@ -1,0 +1,9 @@
+% bibentry template for lsst.bib in https://github.com/lsst/lsst-texmf/blob/master/texmf/bibtex/bib/lsst.bib
+
+@DocuShare{RTN-022,
+   author = { Eric Neilsen },
+    title = {Seeing values for LSST strategy simulations},
+     year = 2021,
+    month = Jun,
+   handle = {RTN-022},
+      url = {https://rtn-022.lsst.io } }
