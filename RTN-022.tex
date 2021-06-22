@@ -29,7 +29,7 @@ Eric Neilsen
 % \setDocCurator{The Curator of this Document}
 
 \setDocAbstract{%
-The \texttt{opsim4} operations simulation program for the LSST astronomical survey uses a database of seeing values covering the range of times to be simulated. I describe the creation of such a database using Dual Image Motion Monitor (DIMM) data collected at Cerro Pachon from 2004-03-17 to 2019-10-07. In times during which the data overlap, I compare the distribution of DIMM seeing values to the seeing measured in DECam images, taken at a site ~10 km away. Instrumental problems in the DIMM may indicate unreliable measurements, cuts on image quality (as indicated by the measured Strehl ratio) were explored. The DIMM has significant gaps, so I model the data (with and without cuts on Strehl ratio) and generate artificial data in the gaps according to the model. The model consists of a sinusoidal variation with a period of one year, an autoregressive (AR1) model for variations in mean seeing from one night to the next, and another AR1 model for variations on a 5 minute timescale. I create four databases according to this procedure, two based on DIMM data starting 2006-01-01 (with and without a Strehl ratio cut), and two starting 2009-01-01. I then run \texttt{opsim} simulations using each, and an otherwise identical simulation using the default seeing database, and explore the differences.
+The \texttt{opsim4} operations simulation program for the LSST astronomical survey uses a database of seeing values covering the range of times to be simulated. I describe the creation of such a database using Dual Image Motion Monitor (DIMM) data collected at Cerro Pachon from 2004-03-17 to 2019-10-07. In times during which the data overlap, I compare the distribution of DIMM seeing values to the seeing measured in DECam images, taken at a site ~10 km away. Because instrumental problems in the DIMM may indicate unreliable measurements, cuts on image quality (as indicated by the measured Strehl ratio) were explored. The DIMM has significant gaps, so I model the data (with and without cuts on Strehl ratio) and generate artificial data in the gaps according to the model. The model consists of a sinusoidal variation with a period of one year, an autoregressive (AR1) model for variations in mean seeing from one night to the next, and another AR1 model for variations on a 5 minute timescale. I create four databases according to this procedure, two based on DIMM data starting 2006-01-01 (with and without a Strehl ratio cut), and two starting 2009-01-01. I then run \texttt{opsim} simulations using each, and an otherwise identical simulation using the default seeing database, and explore the differences.
 }
 
 % Change history defined here.
@@ -55,12 +55,10 @@ The \texttt{opsim4} operations simulation program for the LSST astronomical surv
 \section{Introduction}
 \label{sec:intro}
 
-The Large Synoptic Survey Telescope (LSST) is a telescope currently
-under construction on Cerro Pachon, in Chile. It will spend 10 years
-performing an astronomical survey, taking repeated images across a
-large fraction of the sky visible from Cerro Pachon. It will take
-images of any given area of the sky multiple times, spread across many
-nights, so that transient objects may be detected and characterized.
+The Vera C. Rubin Observatory is currently under construction on Cerro
+Pachon, in Chile. It will spend 10 years performing Legacy Survey of
+Space and Time (LSST), taking repeated images across a large fraction
+of the sky visible from Cerro Pachon.
 
 Turbulence in the Earth's atmosphere causes short time-scale variations
 in the index of refraction of the air. These variations place limits
@@ -74,34 +72,23 @@ transient weather patterns. \cite{2009PASP..121..922E}, for example,
 measure a significant variation in seeing with time of year at Cerro
 Tololo, a site $\sim10 \mbox{ km}$ from Cerro Pachon.
 
-The \texttt{opsim} operations simulationor generates a database of
-exposures plausible for an execution of the survey. Each exposure in
-the database includes several parameters, including the time the
-exposure was taken, the depth of the image (the brightness of the
-faintest objects detected at a given signal to noise ratio), and the
-delivered PSF FWHM. The LSST project and science groups use these
-databases of simulated exposures to evaluate the data quality that
-would result from different operations strategies. Such evaluations
-can then be used both to select among candidate observing strategies,
-and set expectations for the scientific usefulness of the LSST data
-set.
+The \texttt{opsim} operations simulation follows candidate survey
+strategies to generate a database of exposures plausible for an
+execution of the survey. Each exposure in the database includes
+several parameters, including the time the exposure was taken, the
+depth of the image (the brightness of the faintest objects detected at
+a given signal to noise ratio), and the delivered PSF FWHM. The LSST
+project and science groups use these databases to evaluate the
+different operations strategies. Such evaluations can then be used
+both to select among candidate observing strategies, and set
+expectations for the scientific usefulness of the LSST data set.
 
 To calculate the depth and PSF FWHM of each simulated exposure, the
 simulator must have a value for the atmospheric seeing at the time the
 image was taken. It takes these values from a simple database table, which
 provides atmospheric seeing values at a set of times.
 
-The seeing data is not only used to calculate the data quality values
-for each exposure in the final database; it may also affect the
-scheduling of the exposures themselves. Some science programs are more
-sensitive to the seeing than others, and the scheduler can
-use this data in its choice of which exposure to take at a given
-time. For example, a less urgent exposure needed for one program may
-be taken in preference to a more urgent exposure needed for another,
-if the seeing is too poor for the data to be useful for the more
-urgent exposure, but adequate for the less urgent one.
-
-TTherefore, the details of the seeing database used by \texttt{opsim}
+The details of the seeing database used by \texttt{opsim}
 can affect the results in several ways:
 
 \begin{itemize}
@@ -128,7 +115,7 @@ can affect the results in several ways:
   \item The autocorrelation of the seeing over time on timescales
     similar to the time between one exposure and the next will affect
     the ability of the scheduler to react appropriately to changes in
-    seeing. 
+    seeing, if the strategy calls for it to do so.
     
 \end{itemize}
 
@@ -144,13 +131,13 @@ be derived directly from DIMM measurements [\cite{1965JOSA...55.1427F,
     1987PASP...99.1360M, 2002PASP..114.1156T}].
 
 The archive of DIMM data for Cerro Pachon records seeing values
-derived for $0.5 \micron$ light using a Kolmogorov turbulence model,
+derived for $500\nm$ light using a Kolmogorov turbulence model,
 which may be pessimistic. \cite{2002PASP..114.1156T} provides a
 formula for approximating a more realistic von K\'arm\'an model,
 provided one can estimate the outer scale of the turbulence.
 
 The default seeing database used by \texttt{opsim4} version 081217 was
-artificially generated from a model derived from a more limited set of
+artificially generated from a model derived from a limited set of
 data from the Cerro Pachon DIMM, and repeats with a period of two
 years.
 
@@ -182,7 +169,7 @@ databases and exploring their effects on \texttt{opsim4} simulations:
 
 \begin{itemize}
 
-  \item Obtain the Cerro Pachon DIMM data, and explore it
+  \item Obtain the Cerro Pachon DIMM data and explore it
     interactively, as provided. See section~\ref{sec:dimm}.
   \item Validate the DIMM data through comparison with seeing
     estimated using DECam imaging. Examine the agreement between these
@@ -228,7 +215,7 @@ databases and exploring their effects on \texttt{opsim4} simulations:
 
 \cite{ebustos} kindly provided an the Cerro Pachon DIMM data in the
 form of two text tables, each with a timestamp and an
-airmass-corrected seeing value for a wavelength of 0.5\micron,
+airmass-corrected seeing value for a wavelength of $500\nm$,
 derived using a Kolmogorov seeing model.
 
 Figure~\ref{fig:monthly-dimm-vs-year} shows the variation in
@@ -238,7 +225,7 @@ match well with anecdotal experience, and indicate a significant
 seasonal component. There are also noticeable long-term trends, but on
 a timescale comparable to or greater than the range of the data, so no
 attempt is made to model these longer term trends here. This feature
-is also evident in the autocorrelation function of the nightly means,
+is also evident in the autocorrelation function of the nightly means.
 
 \begin{figure*}
   \includegraphics[width=\columnwidth]{./figures/monthly_dimm_vs_year.png}
@@ -288,7 +275,7 @@ is genuinely worse when the DIMM Strehl ratio is less than 0.25, such
 that filtering the DIMM data based on Strehl ratio will bias the data
 in the other direction. Fortunately, the fraction of DIMM data with a
 Strehl ratio below 0.25 is low (see figure~\ref{fig:strehl-hist}), so
-it may not make much difference. Seeing simulations based on cut and
+any effect will be minor. Seeing simulations based on cut and
 uncut DIMM data will be used to indicated the range.
 
 \begin{figure*}
@@ -344,10 +331,12 @@ r_0)$ is noticeably closer.
 
 \begin{figure*}
   \includegraphics[width=\columnwidth]{./figures/r0_dist.png}
-  \caption{The upper row shows the distribution of the Fried parameter, $r_0$ in meters
-    (left), and $\log(r_0)$ (right), together with best fit normal
-    distributions. The lower row shows the corresponding
-    probability plots.}
+  \caption{The upper row shows the distribution of the Fried
+    parameter, $r_0$ in meters (left), and $\log(r_0)$ (right),
+    together with best fit normal distributions. The lower row shows
+    the corresponding probability plots. A straight line with a slop
+    of one would indicate a perfect match between the data and the
+    best fit normal distribution.}
   \label{fig:r0-dist}
 \end{figure*}
 
@@ -440,11 +429,11 @@ structure.
 \label{sec:nightly-variation}
 
 After subtraction of the seasonal variation in $\log(r_0)$,
-significant night to night correlation remains. The modeled here as a
+significant night to night correlation remains. These are modeled here as a
 first-order autoregressive process [\cite{cryer_time_2008}], also
 referred to as an AR(1) process or a damped random walk
 [\cite{2009ApJ...698..895K}], described in
-equation~\ref{eq:ar1}. Here, $y_t$ is the difference between the mean
+equation~\ref{eq:ar1}. $y_t$ is the difference between the mean
 $\log(r_0)$ on that night and the seasonal model for
 $\log(r_0)$. $\mbox{L1}$ is the regressive term, the model parameter
 that represents the correlation between one night and the next, and
