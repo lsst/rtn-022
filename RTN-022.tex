@@ -172,9 +172,10 @@ databases and exploring their effects on \texttt{opsim4} simulations:
   \item Obtain the Cerro Pachon DIMM data and explore it
     interactively, as provided. See section~\ref{sec:dimm}.
   \item Validate the DIMM data through comparison with seeing
-    estimated using DECam imaging. Examine the agreement between these
-    data sets as a function of the Strehl ratio recorded for the DIMM,
-    and filter the DIMM data accordingly.
+    estimated using DECam and Gemini South imaging. Examine the
+    agreement between these data sets as a function of the Strehl
+    ratio recorded for the DIMM, and filter the DIMM data accordingly
+    (in necessary).
   \item For each DIMM measurement, calculate the Fried parameter,
     $r_{0}$, and seeing based on the von K\'arm\'an model using the
     correction given in \cite{2002PASP..114.1156T} and an outer scale
@@ -182,8 +183,25 @@ databases and exploring their effects on \texttt{opsim4} simulations:
     reported in \cite{2000ApOpt..39.5415Z}.
   \item Resample the DIMM data to obtain a data set sampled on 5
     minute intervals.
-  \item Interactively explore long time-scale variability, and fit
-    a sine with a period of 1 year to the nightly mean value of
+  \item Create two seeing data sets for LSST observing nights by
+    shifting the resampled DIMM data by 4748 nights (13 years) or 5844
+    nights (16 years), and filling in the gaps in DIMM data using
+    random data derived from a time series model of the DIMM data.
+  \item Create two additional seeing data sets for LSST observing
+    nights by filtering the resampled DIMM data to remove data with
+    suspiciously low Strehl ratios, then shifting and filling in the
+    filtered data following the same procedure applied to unfilterered
+    data.
+  \item Run five \texttt{opsim4} simulations: one using the default seeing
+    database, and one for each of the newly generates seeing
+    databases, and compare the results.
+\end{itemize}
+
+The following procedure produced the model used to generate artificial seeing values for times corresponding to gaps in DIMM data:
+
+\begin{itemize}
+  \item Interactively explore long time-scale variability, and fit a
+    sine with a period of 1 year to the nightly mean value of
     $\log(r_{0})$.
   \item Interactively explore the nightly residuals of $\log(r_{0})$
     (after subtraction of the seasonal model), and fit the residuals
@@ -192,23 +210,15 @@ databases and exploring their effects on \texttt{opsim4} simulations:
     for nightly residuals using a weighted average of the parameters
     as derived from each sequence of nights.
   \item Interactively explore the short time-scale residuals of
-    $\log(r_{0})$ (after subtraction of the nightly mean values), and fit the
-    residuals using a second autoregressive (AR1) model on each
-    consecutive sequence of values in the resampled data. (Gaps
+    $\log(r_{0})$ (after subtraction of the nightly mean values), and
+    fit the residuals using a second autoregressive (AR1) model on
+    each consecutive sequence of values in the resampled data. (Gaps
     in DIMM data during the night result in breaks between sequences
     in the resampled data.) Derive a global AR1 model for short
     time-scale residuals using a weighted average of the parameters as
     derived from each sequence.
-  \item Generate four seeing databases, using four different subsets
-    of the Cerro Pachon DIMM data, corresponding to two different
-    start dates, each cut on not cut on Strehl ratio. Use the derived
-    models to fill in gaps in the DIMM data with values randomly
-    generated according to the derived seasonal, nightly, and
-    short-timescale AR models.
-  \item Run five \texttt{opsim4} simulations: one using the default seeing
-    database, and one for each of the newly generates seeing
-    databases, and compare the results.
 \end{itemize}
+
 
 \section{Cerro Pachon DIMM data}
 \label{sec:dimm}
@@ -218,7 +228,7 @@ form of two text tables, each with a timestamp and an
 airmass-corrected seeing value for a wavelength of $500\nm$,
 derived using a Kolmogorov seeing model.
 
-Figure~\ref{fig:monthly-dimm-vs-year} shows the variation in
+Figures~\ref{fig:decam-monthly-dimm-vs-year} and~\ref{fig:gemini-monthly-dimm-vs-year} shows the variation in
 reported FWHM seeing values with time. The regular extremes of good
 and poor seeing, shortly after the start and midpoint of each year,
 match well with anecdotal experience, and indicate a significant
@@ -230,56 +240,117 @@ is also evident in the autocorrelation function of the nightly means.
 \begin{figure*}
   \includegraphics[width=\columnwidth]{./figures/monthly_dimm_vs_year.png}
   \caption{
-    Horizontal black lines show the median DIMM seeing in each
+    Horizontal black lines show the median (Kolmogorov) DIMM seeing in each
     month. Dark gray bars extend from the first though the third
     quartiles for each month, and light bars from the 5\% to 95\%
-    quantiles.
+    quantiles.    
     The think red line shows the median FWHM seeing as derived from
     DECam imaging (after subtraction in quadrature of a 0.45''
     instrumental contribution, and correction to zenith and
     500nm). Thin red lines show the first and third quartiles, and
     thin orange lines the 5\% and 95\% quantiles.
     }
-  \label{fig:monthly-dimm-vs-year}
+  \label{fig:decam-monthly-dimm-vs-year}
+\end{figure*}
+
+\begin{figure*}
+  \includegraphics[width=\columnwidth]{./figures/monthly_gemini_dimm_vs_year.png}
+  \caption{
+    Horizontal black lines show the median (von K\'arm\'an,
+    $\mathcal{L}_{0} = 30$m) DIMM seeing in each month. Dark gray bars
+    extend from the first though the third quartiles for each month,
+    and light bars from the 5\% to 95\% quantiles.
+    The think red line shows the median FWHM seeing as derived from
+    Gemini South IQ data. Thin red lines show the first and third
+    quartiles, and thin orange lines the 5\% and 95\% quantiles.  }
+  \label{fig:gemini-monthly-dimm-vs-year}
 \end{figure*}
 
 
-Figure~\ref{fig:dimm-vs-decam} compares the seeing quantiles for
-different months of DIMM and DECam data. The correspondence is worst
-when the seeing is very poor (and so is unlikely to be useful in any
-case), and in very good seeing, during which DECam seems to hit a hard
-floor (about where the PSF becomes undersampled).
+
+%% Figure~\ref{fig:dimm-vs-decam} compares the seeing quantiles for
+%% different months of DIMM and DECam data. The correspondence is worst
+%% when the seeing is very poor (and so is unlikely to be useful in any
+%% case), and in very good seeing, during which DECam seems to hit a hard
+%% floor (about where the PSF becomes undersampled).
+
+%% \begin{figure*}
+%%   \includegraphics[width=\columnwidth]{./figures/dimm_vs_decam.png}
+%%   \caption{
+%%     Each point represents a quantile in the FWHM distribution of a
+%%     month, as measured by DECam (horizontal axis) and the DIMM
+%%     (vertical). The shape and size indicated which quantile, and the
+%%     color the median DIMM Strehl ratio in that month.
+%%     }
+%%   \label{fig:dimm-vs-decam}
+%% \end{figure*}
+
+Figure~\ref{fig:gemini-vs-dimm} compares the seeing quantiles for
+different months of DIMM and Gemini South IQ data. The correspondence
+is worst when the seeing is very poor (and so is unlikely to be useful
+in any case). Figure~\ref{fig:gemini-vs-dimm-hexbin} compares corresponding hourly means, and shows a similarly close correspondence.
 
 \begin{figure*}
-  \includegraphics[width=\columnwidth]{./figures/dimm_vs_decam.png}
+  \includegraphics[width=\columnwidth]{./figures/geminiIQ_vs_dimm.png}
   \caption{
     Each point represents a quantile in the FWHM distribution of a
-    month, as measured by DECam (horizontal axis) and the DIMM
+    month, as measured by the DIMM (horizontal axis) and Gemini South IQ
     (vertical). The shape and size indicated which quantile, and the
     color the median DIMM Strehl ratio in that month.
     }
-  \label{fig:dimm-vs-decam}
+  \label{fig:gemini-vs-dimm}
 \end{figure*}
+
+\begin{figure*}
+  \includegraphics[width=\columnwidth]{./figures/geminiIQ_vs_dimm_hexbin.png}
+  \caption{ Color represents counts of hours in hexogonal bins in
+    Gemini IQ vs DIMM seeing space. The red line shows a perfect
+    match. Except for seeing values better than 0.4'', DIMM values
+    predict the Gemini IQ values well, on average.}
+  \label{fig:gemini-vs-dimm-hexbin}
+\end{figure*}
+
 
 \section{DIMM data quality and Strehl ratio}
 
 A DIMM can give unreliable results if it is out of focus or poorly
 aligned. One diagnostic is the Strehl ratio of the DIMM data (see Wang
-et al 2006). However, the Strehl ratio may also be low due to
-atmospheric seeing itself. Figure~\ref{fig:strehl-boxplots} shows both
-of these effects: the upper panel shows that DIMM and DECam seeing are
-well matched except when the Strehl ratio falls below 0.25, where the
-DIMM shows significantly wider PSF FWHMs than the corresponding DECam
+et al 2006). To avoid using potentially bad data, the legacy seeing
+database used by \texttt{opsim} (current as of October 2019) uses a
+seeing database artificially generated using statistics derived from
+Pachon DIMM data taken between 2004-05-06 and 2006-01-20, after a cuts
+on data with low Strehl ratios in the left star
+image. Figure~\ref{fig:claver-strehl-cut} shows the data used to
+generate this database. The sharp cutoff in Strehl ratios indicate
+that the cut value was 0.3 for data taken before 2005-06-17
+(MJD=53538), and 0.5 for data taken after.
+
+\begin{figure*}
+  \includegraphics[width=\columnwidth]{./figures/claver_strehl_cut.png}
+  \caption{
+    2D histograms of the left DIMM Strehl ratio and date in the subset
+    of DIMM data used to generate the legacy \texttt{opsim} seeing data, before
+    (left) and after (right) appliction of cuts on Strehl ratios.
+  }
+  \label{fig:claver-strehl-cut}
+\end{figure*}
+
+A low Strehl ratio is not necessarily an indication of poor DIMM data
+quality: it may also be low due to atmospheric seeing
+itself. Figure~\ref{fig:strehl-boxplots} shows both of these effects:
+the upper panel shows that DIMM and Gemini South seeing are well
+matched except when the Strehl ratio falls below 0.25, where the DIMM
+shows significantly wider PSF FWHMs than the corresponding Gemini
 data. On the other hand, the lower panel shows that the DECam seeing
 is genuinely worse when the DIMM Strehl ratio is less than 0.25, such
 that filtering the DIMM data based on Strehl ratio will bias the data
 in the other direction. Fortunately, the fraction of DIMM data with a
 Strehl ratio below 0.25 is low (see figure~\ref{fig:strehl-hist}), so
-any effect will be minor. Seeing simulations based on cut and
-uncut DIMM data will be used to indicated the range.
+any effect will be minor. Seeing simulations based on cut and uncut
+DIMM data will be used to indicated the range.
 
 \begin{figure*}
-  \includegraphics[width=\columnwidth]{./figures/strehl_boxplots.png}
+  \includegraphics[width=\columnwidth]{./figures/gemini_strehl_boxplots.png}
   \caption{
     The upper panel shows the distribution of the fractional
     difference between DECam and DIMM seeing in hourly bins, split by
@@ -299,44 +370,25 @@ uncut DIMM data will be used to indicated the range.
   \label{fig:strehl-hist}
 \end{figure*}
 
-\section{The legacy seeing database}
+\section{Generating a time series model for the DIMM data}
 
-As of October 2019, \texttt{opsim} uses a seeing database artificially
-generated using statistics derived from Pachon DIMM data taken between
-2004-05-06 and 2006-01-20, after a cuts on data with low Strehl ratios
-in the left star image. Figure~\ref{fig:claver-strehl-cut} indicates
-that the cut value was 0.3 for data taken before 2005-06-17
-(MJD=53538), and 0.5 for data taken after.
+\subsection{The Fried parameter}
 
-\begin{figure*}
-  \includegraphics[width=\columnwidth]{./figures/claver_strehl_cut.png}
-  \caption{
-    2D histograms of the left DIMM Strehl ratio and date in the subset
-    of DIMM data used to generate the legacy \texttt{opsim} seeing data, before
-    (left) and after (right) appliction of cuts on Strehl ratios.
-  }
-  \label{fig:claver-strehl-cut}
-\end{figure*}
-
-
-\section{The Fried parameter}
-
-The Fried parameter, $r_0$, was then calculated for each reported
-value by inverting equation~5 of \cite{2002PASP..114.1156T}.
+The best developed methodologies for modeling time series naturally result in normal distributions: if we can transform the data set to be modeled to roughly match a normal distribution, then a wider variety of tools are available. The FWHM, as reporded by the DIMM, has a highly skewed distribution, with a long poor seeing tail, and a sharp limit to the good seeing. One physically meaningful quantity that can be mapped to the seeing is the Fried parameter, calculated for each reported DIMM value by inverting equation~5 of \cite{2002PASP..114.1156T}.
 Figure~\ref{fig:r0-dist} shows the
-distribution of measured values for the $r_0$, in meters (left) and
+distribution of measured values for the DIMM seeing (FWHM arcseconds) and
 $\log(r_0)$ (right), together with best fit normal
 distributions. Neither distribution is precisely normal, but $\log(
 r_0)$ is noticeably closer.
 
 \begin{figure*}
   \includegraphics[width=\columnwidth]{./figures/r0_dist.png}
-  \caption{The upper row shows the distribution of the Fried
-    parameter, $r_0$ in meters (left), and $\log(r_0)$ (right),
-    together with best fit normal distributions. The lower row shows
-    the corresponding probability plots. A straight line with a slop
-    of one would indicate a perfect match between the data and the
-    best fit normal distribution.}
+  \caption{The upper row shows the distribution of the DIMM seeing in
+    arcseconds (left), and $\log(r_0)$ (right), together with best fit
+    normal distributions. The lower row shows the corresponding
+    probability plots. A straight line with a slop of one would
+    indicate a perfect match between the data and the best fit normal
+    distribution.}
   \label{fig:r0-dist}
 \end{figure*}
 
@@ -470,7 +522,7 @@ tail on the low-$\log(r_0)$ side of the distribution. The later is a
 fundamental limitation of the model. The sharper distribution likely
 arises from the fit of a collection of sub-sequences of nights, rather
 than a full, uninterrupted data set:
-figure~\ref{fig:monthly-dimm-vs-year} clearly shows variations on
+figure~\ref{fig:decam-monthly-dimm-vs-year} clearly shows variations on
 timescales of months to years, too long to be captured by the
 sub-sequences of nights to which the AR1 model was fit.
 
@@ -542,7 +594,7 @@ year offset, such that we take full advantage of all available DIMM
 data. Note that there is overlap between the DIMM data used by these
 two database, so the results are not uncorrelated.
 
-\subsection{\texttt{opsim} simulations}
+\section{\texttt{opsim} simulations}
 \label{sec:simulations}
 
 Three separate simulations were run using \texttt{opsim}, specificaly
@@ -579,11 +631,6 @@ survey, with the default configuration except for the seeing database.
     generate simulated data for gaps. This simulation is otherwise
     identical to {\tt baseline\_v1.3\_10yr}.
 \end{description}
-
-% ----------------------------------------------------------------------
-
-\section{Results}
-\label{sec:results}
 
 Figure~\ref{fig:simseecomp} shows the seeing as a function of time, as
 recorded in the databases produced by each of the five runs of
